@@ -1,0 +1,6 @@
+{
+  "name": "Maetha Radiology Hub",
+  "description": "ศูนย์รวมลิงก์ระบบงานรังสีเทคนิค โรงพยาบาลแม่ทา เพื่อการเข้าถึงข้อมูลระบบงานรังสีได้อย่างมีประสิทธิภาพ",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}
