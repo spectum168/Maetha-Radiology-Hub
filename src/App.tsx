@@ -29,7 +29,8 @@ import {
   AlertTriangle,
   Users,
   Wrench,
-  Activity
+  Activity,
+  Sparkles
 } from 'lucide-react';
 
 import { SYSTEM_LINKS, CATEGORY_LABELS } from './data';
@@ -45,6 +46,7 @@ const IconMap: { [key: string]: React.ComponentType<any> } = {
   GraduationCap,
   BookOpen,
   BarChart3,
+  Sparkles,
 };
 
 export default function App() {
@@ -468,7 +470,13 @@ export default function App() {
                                 className="flex items-center justify-between w-full p-3.5 bg-white dark:bg-[#0c1827] border border-outline-variant rounded-xl hover:bg-secondary hover:text-white dark:hover:bg-secondary dark:hover:text-white text-sm font-bold text-on-surface dark:text-white transition-all group shadow-sm"
                               >
                                 <span className="flex items-center gap-2">
-                                  <ChevronRight className="w-4 h-4 text-secondary group-hover:text-white transition-colors" />
+                                  {alt.iconName && IconMap[alt.iconName] ? (
+                                    React.createElement(IconMap[alt.iconName], {
+                                      className: "w-4 h-4 text-secondary group-hover:text-white transition-colors"
+                                    })
+                                  ) : (
+                                    <ChevronRight className="w-4 h-4 text-secondary group-hover:text-white transition-colors" />
+                                  )}
                                   {alt.label}
                                 </span>
                                 <ExternalLink className="w-4 h-4 opacity-70 group-hover:opacity-100" />

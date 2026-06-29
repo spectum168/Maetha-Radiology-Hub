@@ -88,7 +88,7 @@ export const SYSTEM_LINKS: SystemLink[] = [
     badge: 'Dose Reports',
     altUrls: [
       { label: 'Vercel Dashboard', url: 'https://radiation-dose-dashboard-report.vercel.app' },
-      { label: 'GitHub Pages Hub', url: 'https://spectum168.github.io/Radiation-Dose-Safety-Dashboard/' }
+      { label: 'เครื่องคำนวณและลดรังสี (Dosimeters)', url: 'https://spectum168.github.io/Radiation-Dose-Safety-Dashboard/', iconName: 'Sparkles' }
     ]
   }
 ];
