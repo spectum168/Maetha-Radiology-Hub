@@ -30,7 +30,9 @@ import {
   Users,
   Wrench,
   Activity,
-  Sparkles
+  Sparkles,
+  Trash2,
+  Hospital
 } from 'lucide-react';
 
 import { SYSTEM_LINKS, CATEGORY_LABELS } from './data';
@@ -47,6 +49,8 @@ const IconMap: { [key: string]: React.ComponentType<any> } = {
   BookOpen,
   BarChart3,
   Sparkles,
+  Trash2,
+  Hospital,
 };
 
 export default function App() {
@@ -132,7 +136,7 @@ export default function App() {
   });
 
   // Get links grouped by category for 'all' view
-  const categories: Exclude<CategoryType, 'all'>[] = ['qc', 'docs', 'training', 'safety'];
+  const categories: Exclude<CategoryType, 'all'>[] = ['qc', 'docs', 'training', 'safety', 'smart-hospital'];
 
   return (
     <div className="min-h-screen bg-background text-on-background font-body transition-colors duration-300">
@@ -179,6 +183,12 @@ export default function App() {
               className={`text-sm font-medium pb-1 transition-all ${selectedCategory === 'safety' ? 'text-secondary border-b-2 border-secondary' : 'text-on-surface-variant dark:text-gray-300 hover:text-secondary'}`}
             >
               Safety
+            </button>
+            <button 
+              onClick={() => setSelectedCategory('smart-hospital')}
+              className={`text-sm font-medium pb-1 transition-all ${selectedCategory === 'smart-hospital' ? 'text-secondary border-b-2 border-secondary' : 'text-on-surface-variant dark:text-gray-300 hover:text-secondary'}`}
+            >
+              Smart Hospital
             </button>
           </nav>
 
@@ -416,6 +426,7 @@ export default function App() {
             if (categoryKey === 'docs') sectionIcon = <FolderHeart className="w-5 h-5 text-secondary" />;
             if (categoryKey === 'training') sectionIcon = <GraduationCap className="w-5 h-5 text-secondary" />;
             if (categoryKey === 'safety') sectionIcon = <BarChart3 className="w-5 h-5 text-secondary" />;
+            if (categoryKey === 'smart-hospital') sectionIcon = <Hospital className="w-5 h-5 text-secondary" />;
 
             return (
               <div key={categoryKey} className="space-y-4">

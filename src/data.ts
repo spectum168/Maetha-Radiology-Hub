@@ -33,6 +33,16 @@ export const SYSTEM_LINKS: SystemLink[] = [
     iconName: 'Monitor',
     badge: 'Monitor QC'
   },
+  {
+    id: 'reject-analysis',
+    title: 'ระบบบันทึกข้อมูลการถ่ายภาพรังสีเสีย',
+    englishTitle: 'Rejected Image Recording System',
+    description: 'ระบบบันทึกและรวบรวมข้อมูลการถ่ายภาพรังสีที่ต้องถ่ายซ้ำ (Reject Film) เพื่อนำข้อมูลมาวิเคราะห์และปรับปรุงคุณภาพการบริการ',
+    category: 'qc',
+    url: 'https://script.google.com/macros/s/AKfycbwqsNJm89VnVB1A0486slNZqRf5WDeYG5KfB4qogIJM6Mh6aQ0rNQheC9rkBcACTtq09A/exec',
+    iconName: 'Trash2',
+    badge: 'Reject Analysis'
+  },
   // Documents & Evidence
   {
     id: 'pregnancy-consent',
@@ -90,6 +100,17 @@ export const SYSTEM_LINKS: SystemLink[] = [
       { label: 'ระบบรายงานปริมาณรังสีบุคคล โรงพยาบาลแม่ทา', url: 'https://radiation-dose-dashboard-report.vercel.app' },
       { label: 'เครื่องคำนวณและลดรังสี (Dosimeters)', url: 'https://spectum168.github.io/Radiation-Dose-Safety-Dashboard/', iconName: 'Sparkles' }
     ]
+  },
+  {
+    id: 'maetha-smart-hospital',
+    title: 'ศูนย์กลางระบบสารสนเทศ โรงพยาบาลแม่ทา',
+    englishTitle: 'Maetha Hospital Information System Center',
+    description: 'ศูนย์กลางเชื่อมโยงระบบบริหารสารสนเทศทางการแพทย์ การจัดการข้อมูลโรงพยาบาล และระบบภายในโรงพยาบาลแม่ทา',
+    category: 'smart-hospital',
+    url: 'http://192.168.2.112/index.php',
+    iconName: 'Hospital',
+    badge: 'Smart Hospital',
+    isPopular: true
   }
 ];
 
@@ -98,5 +119,6 @@ export const CATEGORY_LABELS = {
   qc: { th: 'การตรวจสอบและควบคุมคุณภาพ (QC & Maintenance)', en: 'QC & Maintenance' },
   docs: { th: 'เอกสารและหลักฐานทางการแพทย์ (Documents & Evidence)', en: 'Documents & Evidence' },
   training: { th: 'การเรียนรู้และบุคลากร (Training & Personnel)', en: 'Training & Personnel' },
-  safety: { th: 'ความปลอดภัยและรายงาน (Safety & Reports)', en: 'Safety & Reports' }
+  safety: { th: 'ความปลอดภัยและรายงาน (Safety & Reports)', en: 'Safety & Reports' },
+  'smart-hospital': { th: 'Smart Hospital (ระบบสารสนเทศโรงพยาบาล)', en: 'Smart Hospital Info Center' }
 };

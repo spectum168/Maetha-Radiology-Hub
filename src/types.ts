@@ -3,7 +3,7 @@ export interface SystemLink {
   title: string;
   englishTitle?: string;
   description: string;
-  category: 'qc' | 'docs' | 'training' | 'safety';
+  category: 'qc' | 'docs' | 'training' | 'safety' | 'smart-hospital';
   url: string;
   altUrls?: { label: string; url: string; iconName?: string }[]; // For systems with multiple options like reports
   iconName: string; // To match lucide icons dynamically
@@ -11,4 +11,4 @@ export interface SystemLink {
   isPopular?: boolean;
 }
 
-export type CategoryType = 'all' | 'qc' | 'docs' | 'training' | 'safety';
+export type CategoryType = 'all' | 'qc' | 'docs' | 'training' | 'safety' | 'smart-hospital';
