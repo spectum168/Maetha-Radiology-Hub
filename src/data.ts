@@ -113,6 +113,17 @@ export const SYSTEM_LINKS: SystemLink[] = [
     isPopular: true
   },
   {
+    id: 'maetha-sarabun',
+    title: 'ระบบสารบรรณ โรงพยาบาลแม่ทา',
+    englishTitle: 'Maetha Hospital Correspondence System',
+    description: 'ระบบสารบรรณอิเล็กทรอนิกส์สำหรับบริหารจัดการ รับ-ส่ง จัดเก็บ และติดตามหนังสือราชการและเอกสารภายในโรงพยาบาล',
+    category: 'smart-hospital',
+    url: 'http://61.19.21.202:8000/sarabunmobile/?a=home',
+    iconName: 'FileText',
+    badge: 'e-Sarabun',
+    isPopular: true
+  },
+  {
     id: 'maetha-smart-hospital',
     title: 'ศูนย์กลางระบบสารสนเทศ โรงพยาบาลแม่ทา',
     englishTitle: 'Maetha Hospital Information System Center',

@@ -33,7 +33,8 @@ import {
   Activity,
   Sparkles,
   Trash2,
-  Hospital
+  Hospital,
+  FileText
 } from 'lucide-react';
 
 import { SYSTEM_LINKS, CATEGORY_LABELS } from './data';
@@ -53,6 +54,7 @@ const IconMap: { [key: string]: React.ComponentType<any> } = {
   Trash2,
   Hospital,
   ShieldAlert,
+  FileText,
 };
 
 export default function App() {
