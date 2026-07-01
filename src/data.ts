@@ -102,6 +102,17 @@ export const SYSTEM_LINKS: SystemLink[] = [
     ]
   },
   {
+    id: 'healthcare-risk-management',
+    title: 'ระบบการบริหารจัดการความเสี่ยงของสถานพยาบาล',
+    englishTitle: 'Healthcare Risk Management System (HRMS)',
+    description: 'ระบบรายงาน ติดตาม และบริหารจัดการอุบัติการณ์ความเสี่ยงเพื่อความปลอดภัยในสถานพยาบาล',
+    category: 'safety',
+    url: 'https://hrms41.thai-nrls.org/HRMS11140/Account/Login?ReturnUrl=%2FHRMS11140%2FAccount%2FLogoff',
+    iconName: 'ShieldAlert',
+    badge: 'HRMS Risk',
+    isPopular: true
+  },
+  {
     id: 'maetha-smart-hospital',
     title: 'ศูนย์กลางระบบสารสนเทศ โรงพยาบาลแม่ทา',
     englishTitle: 'Maetha Hospital Information System Center',

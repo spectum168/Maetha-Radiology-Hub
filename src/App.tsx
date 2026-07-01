@@ -24,6 +24,7 @@ import {
   Info,
   PhoneCall,
   Shield,
+  ShieldAlert,
   Heart,
   CheckCircle,
   AlertTriangle,
@@ -51,6 +52,7 @@ const IconMap: { [key: string]: React.ComponentType<any> } = {
   Sparkles,
   Trash2,
   Hospital,
+  ShieldAlert,
 };
 
 export default function App() {
