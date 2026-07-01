@@ -34,7 +34,9 @@ import {
   Sparkles,
   Trash2,
   Hospital,
-  FileText
+  FileText,
+  Lock,
+  Unlock
 } from 'lucide-react';
 
 import { SYSTEM_LINKS, CATEGORY_LABELS } from './data';
@@ -86,8 +88,31 @@ export default function App() {
   // Copied link toast feedback state
   const [copiedId, setCopiedId] = useState<string | null>(null);
 
+  // Admin Mode states
+  const [isAdmin, setIsAdmin] = useState<boolean>(() => {
+    try {
+      const saved = localStorage.getItem('maetha_radiology_is_admin');
+      return saved === 'true';
+    } catch {
+      return false;
+    }
+  });
+
+  const [deletedLinks, setDeletedLinks] = useState<string[]>(() => {
+    try {
+      const saved = localStorage.getItem('maetha_radiology_deleted_links');
+      return saved ? JSON.parse(saved) : [];
+    } catch {
+      return [];
+    }
+  });
+
+  const [adminPinInput, setAdminPinInput] = useState('');
+  const [pinError, setPinError] = useState('');
+  const [linkToDelete, setLinkToDelete] = useState<SystemLink | null>(null);
+
   // Modal states
-  const [activeModal, setActiveModal] = useState<'notifications' | 'help' | 'emergency' | 'directory' | 'support' | 'privacy' | null>(null);
+  const [activeModal, setActiveModal] = useState<'notifications' | 'help' | 'emergency' | 'directory' | 'support' | 'privacy' | 'admin-login' | null>(null);
   
   // Quick Mock States for Interactive Hospital Logs
   const [qcStatusToday, setQcStatusToday] = useState<{ daily: boolean; quarterly: boolean }>({
@@ -99,6 +124,15 @@ export default function App() {
   useEffect(() => {
     localStorage.setItem('maetha_radiology_favorites', JSON.stringify(favorites));
   }, [favorites]);
+
+  // Persist Admin and Deleted Links
+  useEffect(() => {
+    localStorage.setItem('maetha_radiology_is_admin', String(isAdmin));
+  }, [isAdmin]);
+
+  useEffect(() => {
+    localStorage.setItem('maetha_radiology_deleted_links', JSON.stringify(deletedLinks));
+  }, [deletedLinks]);
 
   // Handle Dark Mode toggling
   useEffect(() => {
@@ -128,8 +162,39 @@ export default function App() {
     });
   };
 
-  // Filter links based on search query & selected category
+  const handleAdminLogin = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (adminPinInput === '12345') {
+      setIsAdmin(true);
+      setAdminPinInput('');
+      setPinError('');
+      setActiveModal(null);
+    } else {
+      setPinError('รหัสผ่านไม่ถูกต้อง กรุณาลองใหม่อีกครั้ง');
+    }
+  };
+
+  const handleAdminLogout = () => {
+    setIsAdmin(false);
+    setActiveModal(null);
+  };
+
+  const handleDeleteLink = (id: string) => {
+    setDeletedLinks(prev => [...prev, id]);
+    setLinkToDelete(null);
+  };
+
+  const handleRestoreAllLinks = () => {
+    if (window.confirm('คุณแน่ใจหรือไม่ที่จะกู้คืนระบบงานทั้งหมดที่เคยถูกลบไป?')) {
+      setDeletedLinks([]);
+    }
+  };
+
+  // Filter links based on search query & selected category (and exclude deleted ones)
   const filteredLinks = SYSTEM_LINKS.filter(link => {
+    // Exclude deleted links
+    if (deletedLinks.includes(link.id)) return false;
+
     const matchesCategory = selectedCategory === 'all' || link.category === selectedCategory;
     const matchesSearch = 
       link.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
@@ -226,12 +291,80 @@ export default function App() {
             >
               <HelpCircle className="w-5 h-5" />
             </button>
+
+            {/* Admin Mode Toggle Button */}
+            <button 
+              onClick={() => isAdmin ? handleAdminLogout() : setActiveModal('admin-login')}
+              className={`flex items-center gap-1 px-3 py-1.5 rounded-full text-xs font-bold transition-all ${
+                isAdmin 
+                  ? 'bg-rose-500/10 text-rose-600 dark:text-rose-400 border border-rose-500/20' 
+                  : 'bg-surface-container hover:bg-gray-200 dark:hover:bg-gray-800 text-on-surface-variant dark:text-gray-300'
+              }`}
+              title={isAdmin ? "ออกจากระบบแอดมิน" : "เข้าสู่ระบบแอดมิน"}
+            >
+              {isAdmin ? (
+                <>
+                  <Unlock className="w-3.5 h-3.5 text-rose-500 animate-pulse" />
+                  <span>แอดมิน</span>
+                </>
+              ) : (
+                <>
+                  <Lock className="w-3.5 h-3.5" />
+                  <span>แอดมิน</span>
+                </>
+              )}
+            </button>
           </div>
         </div>
       </header>
 
       {/* Main Container */}
       <main className="py-8 px-4 md:px-6 max-w-7xl mx-auto space-y-8">
+
+        {/* Admin Dashboard Control Info Panel */}
+        {isAdmin && (
+          <motion.div 
+            initial={{ opacity: 0, y: -10 }}
+            animate={{ opacity: 1, y: 0 }}
+            className="p-4 bg-rose-500/5 dark:bg-rose-950/10 border border-rose-500/20 rounded-2xl flex flex-col sm:flex-row sm:items-center justify-between gap-4"
+          >
+            <div className="flex items-center gap-3">
+              <div className="w-10 h-10 rounded-xl bg-rose-500/10 dark:bg-rose-500/20 flex items-center justify-center text-rose-500 flex-shrink-0">
+                <Trash2 className="w-5 h-5 animate-pulse" />
+              </div>
+              <div>
+                <h4 className="font-display font-bold text-sm text-rose-600 dark:text-rose-400">
+                  โหมดผู้ดูแลระบบ (Admin Mode) - จัดการระบบลิงก์แอปพลิเคชัน
+                </h4>
+                <p className="text-xs text-on-surface-variant dark:text-gray-400 font-sans">
+                  คุณกำลังมีสิทธิ์ลบแอปที่เลือกได้ ปุ่มลบจะแสดงเป็นสีแดงเด่นบนแต่ละแอปการ์ด
+                </p>
+              </div>
+            </div>
+            
+            <div className="flex flex-wrap items-center gap-2">
+              {deletedLinks.length > 0 ? (
+                <button
+                  onClick={handleRestoreAllLinks}
+                  className="px-3.5 py-1.5 rounded-xl bg-rose-500 hover:bg-rose-600 text-white text-xs font-bold transition-all shadow-sm flex items-center gap-1.5"
+                >
+                  กู้คืนระบบงานที่ลบทั้งหมด ({deletedLinks.length})
+                </button>
+              ) : (
+                <span className="text-xs text-gray-400 dark:text-gray-500">
+                  ไม่มีระบบงานที่ถูกลบ
+                </span>
+              )}
+              
+              <button
+                onClick={handleAdminLogout}
+                className="px-3.5 py-1.5 rounded-xl border border-gray-200 dark:border-gray-800 hover:bg-gray-100 dark:hover:bg-gray-800 text-on-surface-variant dark:text-gray-300 text-xs font-bold transition-all"
+              >
+                ออกจากโหมดแอดมิน
+              </button>
+            </div>
+          </motion.div>
+        )}
         
         {/* Banner Section */}
         <section className="relative overflow-hidden rounded-2xl bg-gradient-to-br from-surface-container-low to-surface-container dark:from-[#11253e] dark:to-[#091524] border border-outline-variant/50 p-6 md:p-8 text-center transition-all">
@@ -455,9 +588,21 @@ export default function App() {
                               <div className="w-12 h-12 bg-white dark:bg-[#08121f] rounded-xl flex items-center justify-center text-secondary shadow-sm">
                                 <BarChart3 className="w-6 h-6" />
                               </div>
-                              <span className="text-xs font-semibold px-2 py-1 bg-secondary/10 text-secondary rounded-full">
-                                {link.badge}
-                              </span>
+                              <div className="flex items-center gap-2">
+                                {isAdmin && (
+                                  <button
+                                    onClick={() => setLinkToDelete(link)}
+                                    className="px-2.5 py-1.5 bg-rose-500/10 hover:bg-rose-500 text-rose-600 hover:text-white rounded-lg transition-colors font-bold text-xs flex items-center gap-1"
+                                    title="ลบแอป"
+                                  >
+                                    <Trash2 className="w-3.5 h-3.5" />
+                                    <span>ลบแอป</span>
+                                  </button>
+                                )}
+                                <span className="text-xs font-semibold px-2 py-1 bg-secondary/10 text-secondary rounded-full">
+                                  {link.badge}
+                                </span>
+                              </div>
                             </div>
                             
                             <div className="space-y-2">
@@ -476,27 +621,42 @@ export default function App() {
                           </div>
 
                           <div className="space-y-3 mt-6">
-                            {link.altUrls?.map((alt, index) => (
+                            {link.altUrls && link.altUrls.length > 0 ? (
+                              link.altUrls.map((alt, index) => (
+                                <a
+                                  key={index}
+                                  href={alt.url}
+                                  target="_blank"
+                                  rel="noopener noreferrer"
+                                  className="flex items-center justify-between w-full p-3.5 bg-white dark:bg-[#0c1827] border border-outline-variant rounded-xl hover:bg-secondary hover:text-white dark:hover:bg-secondary dark:hover:text-white text-sm font-bold text-on-surface dark:text-white transition-all group shadow-sm"
+                                >
+                                  <span className="flex items-center gap-2">
+                                    {alt.iconName && IconMap[alt.iconName] ? (
+                                      React.createElement(IconMap[alt.iconName], {
+                                        className: "w-4 h-4 text-secondary group-hover:text-white transition-colors"
+                                      })
+                                    ) : (
+                                      <ChevronRight className="w-4 h-4 text-secondary group-hover:text-white transition-colors" />
+                                    )}
+                                    {alt.label}
+                                  </span>
+                                  <ExternalLink className="w-4 h-4 opacity-70 group-hover:opacity-100" />
+                                </a>
+                              ))
+                            ) : (
                               <a
-                                key={index}
-                                href={alt.url}
+                                href={link.url}
                                 target="_blank"
                                 rel="noopener noreferrer"
                                 className="flex items-center justify-between w-full p-3.5 bg-white dark:bg-[#0c1827] border border-outline-variant rounded-xl hover:bg-secondary hover:text-white dark:hover:bg-secondary dark:hover:text-white text-sm font-bold text-on-surface dark:text-white transition-all group shadow-sm"
                               >
                                 <span className="flex items-center gap-2">
-                                  {alt.iconName && IconMap[alt.iconName] ? (
-                                    React.createElement(IconMap[alt.iconName], {
-                                      className: "w-4 h-4 text-secondary group-hover:text-white transition-colors"
-                                    })
-                                  ) : (
-                                    <ChevronRight className="w-4 h-4 text-secondary group-hover:text-white transition-colors" />
-                                  )}
-                                  {alt.label}
+                                  <ChevronRight className="w-4 h-4 text-secondary group-hover:text-white transition-colors" />
+                                  เปิดเข้าใช้งานระบบ
                                 </span>
                                 <ExternalLink className="w-4 h-4 opacity-70 group-hover:opacity-100" />
                               </a>
-                            ))}
+                            )}
                           </div>
                         </div>
                       </div>
@@ -585,25 +745,35 @@ export default function App() {
                           </div>
 
                           {/* Card bottom buttons */}
-                          <div className="flex items-center justify-between mt-6 pt-4 border-t border-gray-100 dark:border-gray-800">
+                          <div className="flex items-center justify-between mt-6 pt-4 border-t border-gray-100 dark:border-gray-800 gap-2 flex-wrap">
                             
-                            {/* Copy URL share trigger */}
-                            <button
-                              onClick={(e) => copyToClipboard(link.id, link.url, e)}
-                              className="text-xs flex items-center gap-1.5 text-gray-400 hover:text-secondary dark:hover:text-teal-400 transition-colors"
-                            >
-                              {copiedId === link.id ? (
-                                <>
-                                  <Check className="w-3.5 h-3.5 text-emerald-500" />
-                                  <span className="text-emerald-500 font-semibold">คัดลอกสำเร็จ</span>
-                                </>
-                              ) : (
-                                <>
-                                  <Copy className="w-3.5 h-3.5" />
-                                  <span>แชร์ลิงก์</span>
-                                </>
-                              )}
-                            </button>
+                            {isAdmin ? (
+                              <button
+                                onClick={() => setLinkToDelete(link)}
+                                className="text-xs flex items-center gap-1 px-2.5 py-1.5 bg-rose-500/10 hover:bg-rose-500 text-rose-600 hover:text-white rounded-lg transition-colors font-bold"
+                              >
+                                <Trash2 className="w-3.5 h-3.5" />
+                                <span>ลบแอป</span>
+                              </button>
+                            ) : (
+                              /* Copy URL share trigger */
+                              <button
+                                onClick={(e) => copyToClipboard(link.id, link.url, e)}
+                                className="text-xs flex items-center gap-1.5 text-gray-400 hover:text-secondary dark:hover:text-teal-400 transition-colors"
+                              >
+                                {copiedId === link.id ? (
+                                  <>
+                                    <Check className="w-3.5 h-3.5 text-emerald-500" />
+                                    <span className="text-emerald-500 font-semibold">คัดลอกสำเร็จ</span>
+                                  </>
+                                ) : (
+                                  <>
+                                    <Copy className="w-3.5 h-3.5" />
+                                    <span>แชร์ลิงก์</span>
+                                  </>
+                                )}
+                              </button>
+                            )}
 
                             {/* Direct URL launcher */}
                             <a
@@ -736,6 +906,12 @@ export default function App() {
                     <>
                       <Shield className="w-5 h-5 text-secondary" />
                       นโยบายการคุ้มครองข้อมูลส่วนบุคคล (PDPA)
+                    </>
+                  )}
+                  {activeModal === 'admin-login' && (
+                    <>
+                      <Lock className="w-5 h-5 text-rose-500" />
+                      เข้าสู่ระบบผู้ดูแลระบบ (Admin Login)
                     </>
                   )}
                 </h3>
@@ -895,15 +1071,141 @@ export default function App() {
                   </div>
                 )}
 
+                {/* 7. Admin Login Modal */}
+                {activeModal === 'admin-login' && (
+                  <form id="admin-login-form" onSubmit={handleAdminLogin} className="space-y-4">
+                    <p className="text-xs text-on-surface-variant dark:text-gray-400">
+                      กรุณากรอกรหัสแอดมิน 5 หลัก เพื่อเปิดสิทธิ์ในการจัดการลบระบบงานต่าง ๆ
+                    </p>
+                    
+                    <div className="space-y-2">
+                      <label className="text-xs font-bold text-on-surface dark:text-gray-300 block">
+                        รหัสผ่านแอดมิน (Admin PIN)
+                      </label>
+                      <input
+                        type="password"
+                        placeholder="•••••"
+                        value={adminPinInput}
+                        onChange={(e) => {
+                          setAdminPinInput(e.target.value);
+                          if (pinError) setPinError('');
+                        }}
+                        className="w-full px-4 py-3 bg-gray-50 dark:bg-[#0c1827] border border-outline-variant rounded-xl text-center font-mono text-lg tracking-widest focus:outline-none focus:ring-2 focus:ring-secondary/50 text-on-surface dark:text-white"
+                        autoFocus
+                        required
+                      />
+                      {pinError && (
+                        <p className="text-xs text-rose-500 font-semibold mt-1">
+                          {pinError}
+                        </p>
+                      )}
+                    </div>
+                  </form>
+                )}
+
               </div>
 
               {/* Modal Footer */}
               <div className="flex-shrink-0 border-t border-gray-100 dark:border-gray-800 pt-4 mt-4 flex justify-end">
+                {activeModal === 'admin-login' ? (
+                  <div className="flex gap-2">
+                    <button
+                      type="button"
+                      onClick={() => { setActiveModal(null); setAdminPinInput(''); setPinError(''); }}
+                      className="px-4 py-2 bg-gray-100 dark:bg-gray-800 hover:bg-gray-200 dark:hover:bg-gray-700 text-on-surface-variant dark:text-gray-300 rounded-xl text-xs font-bold transition-colors"
+                    >
+                      ยกเลิก
+                    </button>
+                    <button
+                      type="submit"
+                      form="admin-login-form"
+                      className="px-4 py-2 bg-secondary text-white hover:bg-secondary-container hover:text-on-secondary-container rounded-xl text-xs font-bold transition-colors shadow-sm"
+                    >
+                      เข้าสู่ระบบ
+                    </button>
+                  </div>
+                ) : (
+                  <button
+                    onClick={() => setActiveModal(null)}
+                    className="px-4 py-2 bg-secondary text-white hover:bg-secondary-container hover:text-on-secondary-container rounded-xl text-xs font-bold transition-colors shadow-sm"
+                  >
+                    ตกลง / เข้าใจแล้ว
+                  </button>
+                )}
+              </div>
+
+            </motion.div>
+          </div>
+        )}
+      </AnimatePresence>
+
+      {/* Delete Confirmation Modal */}
+      <AnimatePresence>
+        {linkToDelete && (
+          <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
+            
+            {/* Backdrop */}
+            <motion.div
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              onClick={() => setLinkToDelete(null)}
+              className="absolute inset-0 bg-black/60 backdrop-blur-sm"
+            ></motion.div>
+
+            {/* Modal Body */}
+            <motion.div
+              initial={{ scale: 0.95, y: 15, opacity: 0 }}
+              animate={{ scale: 1, y: 0, opacity: 1 }}
+              exit={{ scale: 0.95, y: 15, opacity: 0 }}
+              transition={{ type: 'spring', duration: 0.4 }}
+              className="relative w-full max-w-md bg-white dark:bg-[#0b1c30] rounded-2xl border border-outline-variant shadow-2xl p-6 overflow-hidden flex flex-col space-y-4"
+            >
+              
+              {/* Header */}
+              <div className="flex items-center gap-3 text-rose-500 border-b border-gray-100 dark:border-gray-800 pb-3">
+                <Trash2 className="w-6 h-6 animate-pulse" />
+                <h3 className="font-display font-bold text-base md:text-lg">
+                  ยืนยันการลบระบบงาน
+                </h3>
+              </div>
+
+              {/* Description */}
+              <div className="space-y-2 text-sm text-on-surface-variant dark:text-gray-300">
+                <p>คุณแน่ใจหรือไม่ที่จะลบระบบงานนี้ออกจากแดชบอร์ดหลัก?</p>
+                <div className="p-3.5 bg-rose-500/5 border border-rose-500/10 rounded-xl space-y-1">
+                  <p className="font-bold text-rose-600 dark:text-rose-400">
+                    {linkToDelete.title}
+                  </p>
+                  {linkToDelete.englishTitle && (
+                    <p className="text-xs uppercase tracking-wider text-gray-400 font-mono">
+                      {linkToDelete.englishTitle}
+                    </p>
+                  )}
+                  <p className="text-xs text-gray-500 line-clamp-2">
+                    {linkToDelete.description}
+                  </p>
+                </div>
+                <p className="text-xs text-amber-500 font-semibold">
+                  * การดำเนินการนี้จะซ่อนระบบงานออกจากหน้าหลัก คุณสามารถกู้คืนได้เสมอโดยใช้แถบควบคุมผู้ดูแลระบบสีแดงด้านบน
+                </p>
+              </div>
+
+              {/* Actions */}
+              <div className="flex justify-end gap-2 border-t border-gray-100 dark:border-gray-800 pt-4">
                 <button
-                  onClick={() => setActiveModal(null)}
-                  className="px-4 py-2 bg-secondary text-white hover:bg-secondary-container hover:text-on-secondary-container rounded-xl text-xs font-bold transition-colors shadow-sm"
+                  type="button"
+                  onClick={() => setLinkToDelete(null)}
+                  className="px-4 py-2 bg-gray-100 dark:bg-gray-800 hover:bg-gray-200 dark:hover:bg-gray-700 text-on-surface-variant dark:text-gray-300 rounded-xl text-xs font-bold transition-colors"
                 >
-                  ตกลง / เข้าใจแล้ว
+                  ยกเลิก
+                </button>
+                <button
+                  type="button"
+                  onClick={() => handleDeleteLink(linkToDelete.id)}
+                  className="px-4 py-2 bg-rose-500 hover:bg-rose-600 text-white rounded-xl text-xs font-bold transition-colors shadow-sm"
+                >
+                  ลบระบบงานนี้
                 </button>
               </div>
 
